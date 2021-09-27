@@ -1,5 +1,7 @@
 # frozen_string_literal:true
 
+system 'clear'
+
 def prompt(message)
   puts "=*=*=> #{message}"
 end
@@ -14,12 +16,34 @@ def valid_yn?(ans)
 end
 
 def dollars(num)
-  format("%.2f",num)
+  format('%.2f', num)
 end
 
 def apr_perc(num)
-  format("%.4f",num)
+  format('%.4f', num)
 end
+
+def determine_sales_price
+  sales_price = ''
+  loop do
+    prompt 'What is the total sales price?'
+    sales_price = gets.chomp
+
+    system 'clear'
+
+    if sales_price.to_f.negative?
+      prompt 'Only positive sales values please!'
+      next
+    elsif sales_price.start_with? '.'
+      sales_price = "0#{sales_price}"
+    end
+    break if valid_number? sales_price
+
+      prompt 'Enter sales price as a numerical value.'
+  end
+  sales_price
+end
+
 
 welcome_prompt = <<~MSG
   Welcome! Lets see how that monthly payment is going to look..
@@ -32,24 +56,16 @@ calculating_prompt = <<~MSG
   Let's get to calculating your Monthly Payment!
 MSG
 
+one_more_time = <<~MSG
+  *
+  *
+  Would you like to run some other numbers? y/n
+MSG
+
 prompt welcome_prompt
 
 loop do
-  sales_price = ''
-  loop do
-    prompt 'What is the total sales price?'
-    sales_price = gets.chomp
-    if sales_price.to_f.negative?
-      prompt 'Only positive sales values please!'
-      next
-    elsif sales_price.start_with? '.'
-      sales_price = "0#{sales_price}"
-    end
-    break if valid_number? sales_price
-
-    prompt 'Enter sales price as a numerical value.'
-  end
-
+  sales_price = determine_sales_price
   down_payment = ''
   loan_total = ''
   ans = ''
@@ -62,10 +78,12 @@ loop do
 
       prompt 'Please enter y/n?'
     end
+
     if ans == 'y'
       loop do
         prompt 'How much?'
         down_payment = gets.chomp
+
         if valid_number?(down_payment)
           loan_total = sales_price.to_f - down_payment.to_f
           break
@@ -83,6 +101,8 @@ loop do
     end
     break
   end
+
+  system 'clear'
 
   apr_years = ''
   apr_months = ''
@@ -106,6 +126,8 @@ loop do
     end
   end
 
+  system 'clear'
+
   loan_years = ''
   loan_months = ''
   loop do
@@ -127,6 +149,8 @@ loop do
     end
   end
 
+  system 'clear'
+
   puts calculating_prompt
   puts "The total amount being borrowed is... $#{loan_total}"
   puts "The Annual Percentage Rate is #{apr_years}, and the Monthly Percentage Rate is #{apr_perc(apr_months)}"
@@ -139,7 +163,7 @@ loop do
     monthly_payment = loan_total / loan_months
   end
   prompt "Your Monthly Payments will be: $#{dollars(monthly_payment)}"
-  prompt 'Would you like to run some other numbers? y/n'
+  puts one_more_time
   again = ''
   loop do
     again = gets.chomp
@@ -150,6 +174,8 @@ loop do
   end
 
   break if again == 'n'
+
+  system 'clear'
 
   prompt 'Get your numbers ready!'
 end
