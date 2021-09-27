@@ -30,7 +30,7 @@ def valid_choice?(choice)
 end
 
 def win?(first, second)
-  win = { s: %w[p l], p: %w[r sp], r: %w[s l], l: %w[s p], sp: %w[s r] }
+  win = { s: %w[p l], p: %w[r sp], r: %w[s l], l: %w[sp p], sp: %w[s r] }
   win[first.to_sym].include?(second)
 end
 
