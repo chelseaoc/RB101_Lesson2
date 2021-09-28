@@ -35,14 +35,23 @@ def win?(first, second)
 end
 
 def print_description(user, comp)
-  phrases = { %w[s p] => 'Scissors cuts Paper!', %w[s l] => 'Scissors decapitates Lizard!',
-              %w[p r] => 'Paper covers Rock!', %w[p sp] => 'Paper disproves Spock!',
-              %w[r s] => 'Rock crushes Scissors!', %w[r l] => 'Rock crushes Lizard!',
-              %w[l sp] => 'Lizard poisens Spock!', %w[l p] => 'Lizard eats Paper!',
-              %w[sp s] => 'Spock smashes Scissors!', %w[sp r] => 'Spock vaporizes Rock!' }
+  phrases = { %w[s p] => 'Scissors cuts Paper!',
+              %w[s l] => 'Scissors decapitates Lizard!',
+              %w[p r] => 'Paper covers Rock!',
+              %w[p sp] => 'Paper disproves Spock!',
+              %w[r s] => 'Rock crushes Scissors!',
+              %w[r l] => 'Rock crushes Lizard!',
+              %w[l sp] => 'Lizard poisens Spock!',
+              %w[l p] => 'Lizard eats Paper!',
+              %w[sp s] => 'Spock smashes Scissors!',
+              %w[sp r] => 'Spock vaporizes Rock!' }
   phrases.select do |choices, description|
     puts description if choices.include?(user) && choices.include?(comp)
   end
+end
+
+def valid_yn?(userchoice)
+  %w[y yes n no].include?(userchoice.downcase)
 end
 
 rules = <<~MSG
@@ -95,6 +104,14 @@ loop do
     loop do
       prompt "Execute! #{abb}"
       user_choice = gets.chomp
+      if user_choice.empty?
+        system 'clear'
+        prompt 'Try Again'
+        next
+      elsif %w[spock sp].include?(user_choice.downcase)
+        user_choice = user_choice[0..1].downcase
+      elsif user_choice = user_choice[0].downcase
+      end
       system 'clear'
       break if valid_choice?(user_choice)
 
@@ -104,8 +121,8 @@ loop do
 
     computer_choice = %w[r p s l sp].sample
 
-    prompt "You chose #{abb_converter(user_choice.to_s)}, and #{star_treck_characters}\
- chose #{abb_converter(computer_choice.to_s)}."
+    prompt "You chose #{abb_converter(user_choice.to_s)}, and \
+#{star_treck_characters} chose #{abb_converter(computer_choice.to_s)}."
 
     print_description(user_choice, computer_choice) unless user_choice == computer_choice
 
@@ -131,8 +148,19 @@ loop do
     break if user_win_counter == 3 || computer_win_counter == 3
   end
   prompt 'Challenge another character? y/n'
-  ans = gets.chomp
-  break unless ans.downcase.start_with? 'y'
+  ans = ''
+  loop do
+    ans = gets.chomp
+    if ans.empty?
+      system 'clear'
+      prompt 'Would you like to play again? y/n'
+      next
+    end
+    break if valid_yn?(ans)
+
+    puts 'Only y or n please!'
+  end
+  break if ans.downcase.start_with? 'n'
 
   system 'clear'
 end
