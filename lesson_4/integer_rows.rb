@@ -3,11 +3,12 @@ def integer_rows(num)
   if num==0
     puts num
   elsif num.is_a? Integer
+    number = num * (num+1)
+    array << number
     loop do
-      number = num*2
+      number = number-2
       array << number
-      num = num - 1
-      break if num == 0
+      break if array.size == num
     end
     sum = 0
     array.map{|x| sum += x}
@@ -21,4 +22,5 @@ integer_rows(6)
 integer_rows(0)
 integer_rows("abc")
 integer_rows("")
+integer_rows(957345)
 
