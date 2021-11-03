@@ -82,6 +82,7 @@ def score(cards)
   cards.map do |card, value|
     if card[0] == 'Ace' && value == 11 && total > 21
       cards[card] = 1
+      total = cards.values.inject(:+)
     end
     cards
   end
@@ -98,23 +99,6 @@ end
 # true/false bust?
 def bust?(score)
   score > 21
-end
-
-# print message
-def print_winner_message(comp_points, user_points)
-  if bust?(comp_points) && bust?(user_points)
-    prompt "Both Busted! TIE"
-  elsif comp_points == user_points
-    prompt "TIE"
-  elsif bust?(comp_points)
-    prompt "Dealer Busts! You Win!"
-  elsif bust?(user_points)
-    prompt "You Bust! Dealer Wins!"
-  elsif user_points > comp_points
-    prompt "You Win!"
-  else
-    prompt "Dealer Wins!"
-  end
 end
 
 clear
@@ -155,6 +139,7 @@ loop do
     if bust?(user_points)
       break
     end
+
     clear
     print_your_card_is('Your', user_cards.keys[user_card_key_number += 1])
     prompt "You have a total value of #{user_points}"
@@ -165,7 +150,7 @@ loop do
       end
     end
   end
-  if comp_points <= 17
+  unless bust?(user_points)
     loop do
       break if comp_points >= 17
       comp_points = player_points(comp_cards, full_deck, hash)
@@ -179,7 +164,17 @@ loop do
   prompt "You have a total value of #{user_points}"
   prompt "Dealer has a total value of #{comp_points}"
   yadayada
-  print_winner_message(comp_points, user_points)
+  if bust?(user_points)
+    prompt 'You Bust! Dealer Wins!'
+  elsif bust?(comp_points)
+    prompt 'Dealer Bust! You Win!'
+  elsif comp_points == user_points
+    prompt 'PUSH'
+  elsif user_points > comp_points
+    prompt 'You Win!'
+  else
+    prompt 'Dealer Wins!'
+  end
   prompt "Play Again?"
   answer = gets.chomp.downcase
   break if %w(n no).include?(answer)
