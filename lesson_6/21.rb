@@ -1,5 +1,5 @@
 GAME_TO_NUMBER = 21
-COMPUTER_HIT_TO = 16
+COMPUTER_HIT_TO = 17
 
 def prompt(message)
   puts "---->>#{message}"
@@ -146,7 +146,7 @@ loop do
 #{user_cards.keys[user_card_key_number][0]} of \
 #{user_cards.keys[user_card_key_number][1]}"
       show_all_cards('Your', user_cards, user_points)
-      if comp_points == COMPUTER_HIT_TO
+      if comp_points <= COMPUTER_HIT_TO
         comp_points = player_points(comp_cards, full_deck, hash)
         if bust?(comp_points)
           break
@@ -155,7 +155,7 @@ loop do
     end
     unless bust?(user_points)
       loop do
-        break if comp_points == COMPUTER_HIT_TO
+        break if comp_points >= COMPUTER_HIT_TO
         comp_points = player_points(comp_cards, full_deck, hash)
         if bust?(comp_points)
           break
