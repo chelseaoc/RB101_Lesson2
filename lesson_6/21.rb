@@ -1,5 +1,5 @@
 require "pry"
-# nested array
+
 def prompt(message)
   puts "---->>#{message}"
 end
@@ -8,6 +8,7 @@ def clear
   system 'clear'
 end
 
+# nested array of cards
 def deck_initialize
   number = ['1', '2', '3', '4', '5', '6', '7', '8',
             '9', '10', 'Jack', 'Queen', 'King', 'Ace']
@@ -21,7 +22,7 @@ def deck_initialize
   full_deck
 end
 
-# assign values to deck
+# assign values as hash with array(card) as key and values as value
 def assign_values_to_cards(full_deck)
   hash_values = {}
   full_deck.map do |num, suit|
@@ -29,6 +30,8 @@ def assign_values_to_cards(full_deck)
       value = num.to_i
     elsif %w(Jack Queen King).include?(num)
       value = 10
+    elsif num == 'Ace'
+      value = 11
     end
     hash_values [[num, suit]] = value
   end
@@ -61,16 +64,8 @@ def delete_chosen_cards!(full_deck, choice)
 end
 
 # Value of chosen card
-def determine_value(hash, card, score)
-  if card[0] == 'Ace'
-    if score > 10
-      1
-    else
-      11
-    end
-  else
-    hash[card]
-  end
+def determine_value(hash, card)
+  hash[card]
 end
 
 def yadayada
@@ -80,6 +75,24 @@ def yadayada
   -  -  -  -  -  -  -  -
   -  -  -  -  -  -  -  -
   MSG
+end
+
+def score(cards)
+  total = cards.values.inject(:+)
+  cards.map do |card, value|
+    if card[0] == 'Ace' && value == 11 && total > 21
+      cards[card] = 1
+    end
+    cards
+  end
+  total = cards.values.inject(:+)
+end
+
+def player_points(player_cards, full_deck, hash)
+  card = pick_random_cards(full_deck)
+  player_cards[card] = determine_value(hash, card)
+  delete_chosen_cards!(full_deck, card)
+  score(player_cards)
 end
 
 # true/false bust?
@@ -111,34 +124,23 @@ clear
 loop do
   full_deck = deck_initialize
   hash = assign_values_to_cards(full_deck)
-  user_points = 0
-  comp_points = 0
   user_cards = {}
   comp_cards = {}
   # pick initial 2 cards for user and computer
+  user_points = ''
+  comp_points = ''
   loop do
-    card = pick_random_cards(full_deck)
-    user_cards[card] = determine_value(hash, card, user_points)
-    delete_chosen_cards!(full_deck, card)
-    card = pick_random_cards(full_deck)
-    comp_cards[card] = determine_value(hash, card, comp_points)
-    delete_chosen_cards!(full_deck, card)
-    break if user_cards.length == 2 && comp_cards.length == 2
+    user_points = player_points(user_cards, full_deck, hash)
+    comp_points = player_points(comp_cards, full_deck, hash)
+    break if comp_cards.length == 2
   end
   # show results of first cards
   print_your_card_is('Your first', user_cards.keys[0])
   print_your_card_is('Your second', user_cards.keys[1])
-  user_points = user_cards.values.inject(:+)
   puts "You have a total value of #{user_points}"
   yadayada
   print_your_card_is("Dealer's first", comp_cards.keys[0])
   yadayada
-  comp_points = comp_cards.values.inject(:+)
-  if bust?(user_points)
-    break
-  elsif bust?(comp_points)
-    break
-  end
   user_card_key_number = 1
   loop do
     answer = ''
@@ -149,21 +151,15 @@ loop do
       prompt 'Invalid Response'
     end
     break if %w(s stay).include?(answer)
-    card = pick_random_cards(full_deck)
-    user_cards[card] = determine_value(hash, card, user_points)
-    delete_chosen_cards!(full_deck, card)
-    clear
-    print_your_card_is('Your', user_cards.keys[user_card_key_number += 1])
-    user_points = user_cards.values.inject(:+)
-    prompt "You have a total value of #{user_points}"
+    user_points = player_points(user_cards, full_deck, hash)
     if bust?(user_points)
       break
     end
+    clear
+    print_your_card_is('Your', user_cards.keys[user_card_key_number += 1])
+    prompt "You have a total value of #{user_points}"
     if comp_points <= 17
-      card = pick_random_cards(full_deck)
-      comp_cards[card] = determine_value(hash, card, comp_points)
-      delete_chosen_cards!(full_deck, card)
-      comp_points = comp_cards.values.inject(:+)
+      comp_points = player_points(comp_cards, full_deck, hash)
       if bust?(comp_points)
         break
       end
@@ -172,10 +168,7 @@ loop do
   if comp_points <= 17
     loop do
       break if comp_points >= 17
-      card = pick_random_cards(full_deck)
-      comp_cards[card] = determine_value(hash, card, comp_points)
-      delete_chosen_cards!(full_deck, card)
-      comp_points = comp_cards.values.inject(:+)
+      comp_points = player_points(comp_cards, full_deck, hash)
       if bust?(comp_points)
         break
       end
